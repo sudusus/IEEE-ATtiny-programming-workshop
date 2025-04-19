@@ -146,7 +146,12 @@ void loop() {
                   topScore = topScore << 8;
                   topScore = topScore |  EEPROM.read(1);
                   
-                  if (score>topScore){topScore = score; EEPROM.write(1,topScore & 0xFF); EEPROM.write(0,(topScore>>8) & 0xFF); }
+                  if (score>topScore){
+                    topScore = score; 
+                    EEPROM.write(1,topScore & 0xFF); 
+                    EEPROM.write(0,(topScore>>8) & 0xFF); 
+                  }
+
                   ssd1306_fillscreen(0x00);                
                   ssd1306_char_f6x8(32, 3, "Game Over");
                   ssd1306_char_f6x8(32, 5, "score:");
@@ -156,9 +161,11 @@ void loop() {
                   ssd1306_char_f6x8(32, 6, "top score:");
                   itoa(topScore,temp,10);
                   ssd1306_char_f6x8(90, 6, temp);
-                  for (int i = 0; i<1000; i++){
+
+                  /*for (int i = 0; i<1000; i++){
                     beep(1,random(0,i*2));
-                  }
+                  }*/
+
                   delay(1000);
                   system_sleep();
                   resetGame();
@@ -206,7 +213,7 @@ void loop() {
                     }else {
                       sendBlock(0);
                     }
-                   }   
+                   }
                   ssd1306_send_data_stop();
                   ssd1306_setpos(0,1);
                   ssd1306_send_data_start();
@@ -279,9 +286,8 @@ void resetGame(){
   ssd1306_char_f6x8(16, 2, "B R E A K O U T");
   ssd1306_char_f6x8(20, 4, "lonesoulsurfer");
   ssd1306_char_f6x8(22, 7, "Tiny Arcade"); 
-  
-  beep(200,600);          beep(300,200);          beep(400,300);
   delay(2000);
+
   for (byte i =0; i<16;i++){ // reset blocks
    row1[i]=1; row2[i]=1; row3[i]=1;
   } 
@@ -295,7 +301,7 @@ void resetGame(){
   ballx = player+platformWidth/2;
 }
 
-void collision(){ // the collsision check is actually done befor this is called, this code works out where the ball will bounce
+void collision(){ // the collision check is actually done befor this is called, this code works out where the ball will bounce
   if ((bally+vdir)%8==7&&(ballx+hdir)%8==7){ // bottom right corner
       if (vdir==1){hdir=1;}else if(vdir==-1&&hdir==1){vdir=1;}else {hdir=1;vdir=1;}
     }else if ((bally+vdir)%8==7&&(ballx+hdir)%8==0){ // bottom left corner
@@ -486,16 +492,19 @@ void ssd1306_char_f6x8(uint8_t x, uint8_t y, const char ch[]){
 	}
 }
 
-
-
 void system_sleep() {
   ssd1306_fillscreen(0x00);
-  ssd1306_send_command(0xAE);
-  cbi(ADCSRA,ADEN);                    // switch Analog to Digitalconverter OFF
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN); // sleep mode is set here
-  sleep_enable();
-  sleep_mode();                        // System actually sleeps here
-  sleep_disable();                     // System continues execution here when watchdog timed out 
-  sbi(ADCSRA,ADEN);                    // switch Analog to Digitalconverter ON  
-  ssd1306_send_command(0xAF);
+  ssd1306_char_f6x8(16, 2, "Press any button    to continue");
+
+  while(1==1) { // wait for button press to reset game
+    if (digitalRead(3)==0){ // PB3 pin button
+      break;
+    }
+
+    if (digitalRead(4)==0){ // PB4 pin button
+      
+      break;
+    }
+  }
+  ssd1306_fillscreen(0x00);
 }
